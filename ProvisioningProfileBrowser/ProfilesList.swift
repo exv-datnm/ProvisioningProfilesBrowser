@@ -73,9 +73,15 @@ struct ProfilesList: NSViewRepresentable {
     tableView.delegate = context.coordinator
     tableView.tableViewDelegate = context.coordinator
 
-    let menu = NSMenu()
-    menu.addItem(NSMenuItem(title: "Move to Trash", action: #selector(TableView.tableViewDeleteItemClicked(_:)), keyEquivalent: ""))
-    tableView.menu = menu
+//    let menu = NSMenu()
+//    NSMenuItem.usesUserKeyEquivalents = true
+//    menu.addItem(NSMenuItem(title: "Move to Trash", action: #selector(TableView.tableViewDeleteItemClicked(_:)), keyEquivalent: ""))
+//
+//    let revealFinder = NSMenuItem(title: "Reveal in Finder", action: #selector(TableView.tableViewRevealInFinderItemClicked(_:)), keyEquivalent: "F")
+//
+//    revealFinder.keyEquivalentModifierMask = .command
+//    menu.addItem(revealFinder)
+//    tableView.menu = menu
 
     let scrollView = NSScrollView()
     scrollView.documentView = tableView
@@ -106,7 +112,11 @@ struct ProfilesList: NSViewRepresentable {
     weak var tableViewDelegate: TableViewDelegate?
 
     @objc func tableViewDeleteItemClicked(_ sender: AnyObject) {
-      tableViewDelegate?.moveToTrash(clickedRow)
+      tableViewDelegate?.moveToTrash(selectedRow)
+    }
+
+    @objc func tableViewRevealInFinderItemClicked(_ sender: AnyObject) {
+      tableViewDelegate?.revealInFinder(selectedRow)
     }
   }
 
@@ -129,8 +139,17 @@ struct ProfilesList: NSViewRepresentable {
     // MARK: - TableViewDelegate
 
     func moveToTrash(_ row: Int) {
+      guard row >= 0, row < parent.data.count else { return }
+
       let profile = parent.data[row]
       parent.profilesManager.delete(profile: profile)
+    }
+
+    func revealInFinder(_ row: Int) {
+      guard row >= 0, row < parent.data.count else { return }
+
+      let profile = parent.data[row]
+      parent.profilesManager.revealInFinder(profile: profile)
     }
 
     // MARK: - NSTableViewDelegate
@@ -165,7 +184,9 @@ struct ProfilesList: NSViewRepresentable {
         textField.identifier = tableColumn.identifier
         textField.cell?.truncatesLastVisibleLine = true
         textField.cell?.lineBreakMode = .byTruncatingTail
+        textField.textColor = profile.expirationDate < Date() ? .systemRed : .labelColor
         return textField
+
       case "team":
         let textField = NSTextField()
         textField.cell = VerticallyCenteredTextFieldCell()
@@ -177,7 +198,9 @@ struct ProfilesList: NSViewRepresentable {
         textField.identifier = tableColumn.identifier
         textField.cell?.truncatesLastVisibleLine = true
         textField.cell?.lineBreakMode = .byTruncatingTail
+        textField.textColor = profile.expirationDate < Date() ? .systemRed : .labelColor
         return textField
+
       case "creation":
         let textField = NSTextField()
         textField.cell = VerticallyCenteredTextFieldCell()
@@ -187,7 +210,9 @@ struct ProfilesList: NSViewRepresentable {
         textField.drawsBackground = false
         textField.stringValue = Self.dateFormatter.string(from: profile.creationDate)
         textField.identifier = tableColumn.identifier
+        textField.textColor = profile.expirationDate < Date() ? .systemRed : .labelColor
         return textField
+
       case "expiry":
         let textField = NSTextField()
         textField.cell = VerticallyCenteredTextFieldCell()
@@ -210,7 +235,9 @@ struct ProfilesList: NSViewRepresentable {
         textField.identifier = tableColumn.identifier
         textField.cell?.truncatesLastVisibleLine = true
         textField.cell?.lineBreakMode = .byTruncatingTail
+        textField.textColor = profile.expirationDate < Date() ? .systemRed : .labelColor
         return textField
+
       default:
         fatalError()
       }
@@ -264,5 +291,76 @@ class VerticallyCenteredTextFieldCell : NSTextFieldCell {
 
 protocol TableViewDelegate: AnyObject {
   func moveToTrash(_ row: Int)
+  func revealInFinder(_ row: Int)
 }
 
+extension NSTextField {
+  open override func performKeyEquivalent(with event: NSEvent) -> Bool {
+    guard (self.superview?.superview as? ProfilesList.TableView) != nil else { return false }
+    guard event.modifierFlags.contains(NSEvent.ModifierFlags.command) else { return false }
+    guard event.type == NSEvent.EventType.keyDown else { return false }
+
+    if let character = event.charactersIgnoringModifiers {
+      switch character.lowercased() {
+      case "c":
+        if NSApp.sendAction(#selector(NSText.copy(_:)), to: nil, from: self) { return true }
+        break
+
+      case "v":
+        if NSApp.sendAction(#selector(NSText.paste(_:)), to:nil, from:self) { return true }
+        break
+
+      default:
+        break
+      }
+    }
+
+    return false
+  }
+
+  open override func rightMouseDown(with event: NSEvent) {
+    let rightMenu = NSMenu()
+    rightMenu.addItem(withTitle: "Copy", action: #selector(copyItemClicked(_:)), keyEquivalent: "c")
+    rightMenu.addItem(withTitle: "Delete", action: #selector(tableViewDeleteItemClicked(_:)), keyEquivalent: "d")
+    rightMenu.addItem(withTitle: "Reveal in Finder", action: #selector(revealInFinderItemClicked(_:)), keyEquivalent: "f")
+    NSMenu.popUpContextMenu(rightMenu, with: event, for: self)
+  }
+
+  @objc private func copyItemClicked(_ sender: AnyObject) {
+    NSPasteboard.general.clearContents()
+    NSPasteboard.general.setString(self.stringValue, forType: .string)
+  }
+
+  @objc private func tableViewDeleteItemClicked(_ sender: AnyObject) {
+    guard let tblView = self.superview?.superview as? ProfilesList.TableView else { return }
+    tblView.tableViewDeleteItemClicked(sender)
+  }
+
+  @objc private func revealInFinderItemClicked(_ sender: AnyObject) {
+    guard let tblView = self.superview?.superview as? ProfilesList.TableView else { return }
+    tblView.tableViewRevealInFinderItemClicked(sender)
+  }
+}
+
+extension NSText {
+  open override func rightMouseDown(with event: NSEvent) {
+    guard let textField = self.superview as? NSTextField else {
+      return super.rightMouseDown(with: event)
+    }
+
+    textField.rightMouseDown(with: event)
+  }
+}
+
+extension NSTableView {
+  open override func rightMouseDown(with event: NSEvent) {
+    let point = self.convert(event.locationInWindow, from: nil)
+    let row = self.row(at: point)
+    let col = self.column(at: point)
+    guard row >= 0, row < self.numberOfRows, col >= 0, col < self.numberOfColumns else { return }
+    guard isRowSelected(row) else { return }
+    guard let cellView = self.view(atColumn: col, row: row, makeIfNecessary: false) as? NSTableCellView else { return }
+
+    cellView.textField?.rightMouseDown(with: event)
+  }
+}

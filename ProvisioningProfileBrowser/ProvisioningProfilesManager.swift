@@ -1,6 +1,7 @@
 import Foundation
 import SwiftyProvisioningProfile
 import Witness
+import AppKit
 
 class ProvisioningProfilesManager: ObservableObject {
   @Published var profiles = [ProvisioningProfile]() {
@@ -75,6 +76,14 @@ class ProvisioningProfilesManager: ObservableObject {
   }
 
   func delete(profile: ProvisioningProfile) {
+    let alertView = NSAlert()
+    alertView.messageText = "Do you want to delete Provisioning Profile?"
+    alertView.informativeText = "\(profile.name)\n\(profile.uuid)"
+    alertView.addButton(withTitle: "Cancel")
+    alertView.addButton(withTitle: "Yes")
+    alertView.alertStyle = .warning
+    guard alertView.runModal() == .alertSecondButtonReturn else { return }
+
     do {
       try FileManager.default.trashItem(at: profile.url, resultingItemURL: nil)
       profiles.removeAll { $0 == profile }
@@ -93,6 +102,10 @@ class ProvisioningProfilesManager: ObservableObject {
         $0.uuid.localizedCaseInsensitiveContains(query)
       }
     }
+  }
+
+  func revealInFinder(profile: ProvisioningProfile) {
+    NSWorkspace.shared.activateFileViewerSelecting([profile.url])
   }
 }
 
