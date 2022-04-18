@@ -22,7 +22,7 @@ class ProvisioningProfilesManager: ObservableObject {
 
   init() {
     self.witness = Witness(
-      paths: [Self.provisioningProfilesDirectory.path],
+      paths: [Self.provisioningProfilesDirectoryURL.path],
       flags: .FileEvents,
       latency: 0.3
     ) { [unowned self] events in
@@ -30,7 +30,7 @@ class ProvisioningProfilesManager: ObservableObject {
     }
   }
 
-  private static var provisioningProfilesDirectory: URL {
+  private static var provisioningProfilesDirectoryURL: URL {
     let libraryDirectoryURL = try! FileManager.default.url(
       for: .libraryDirectory,
       in: .userDomainMask,
@@ -40,12 +40,16 @@ class ProvisioningProfilesManager: ObservableObject {
     return libraryDirectoryURL.appendingPathComponent("MobileDevice").appendingPathComponent("Provisioning Profiles")
   }
 
+  private static var desktopUrl: URL {
+    URL(fileURLWithPath: NSHomeDirectory(), isDirectory: true).appendingPathComponent("Desktop")
+  }
+
   func reload() {
     loading = true
 
     do {
       let enumerator = FileManager.default.enumerator(
-        at: Self.provisioningProfilesDirectory,
+        at: Self.provisioningProfilesDirectoryURL,
         includingPropertiesForKeys: [.nameKey],
         options: .skipsHiddenFiles,
         errorHandler: nil
@@ -105,7 +109,30 @@ class ProvisioningProfilesManager: ObservableObject {
   }
 
   func revealInFinder(profile: ProvisioningProfile) {
+    guard FileManager.default.fileExists(atPath: profile.url.path) else {
+      let alertView = NSAlert()
+      alertView.messageText = "File not found!"
+      alertView.informativeText = "\(profile.name)\n\(profile.uuid)"
+      alertView.addButton(withTitle: "OK")
+      alertView.alertStyle = .warning
+      alertView.runModal()
+      return
+    }
     NSWorkspace.shared.activateFileViewerSelecting([profile.url])
+  }
+
+  func exportProfile(_ profile: ProvisioningProfile) {
+    let savePanel = NSSavePanel()
+    savePanel.canCreateDirectories = true
+    savePanel.nameFieldStringValue = profile.name
+    savePanel.allowedFileTypes = ["mobileprovision"]
+    savePanel.prompt = "Export"
+    savePanel.title = "Export Provisioning File (replace if exits)"
+    savePanel.directoryURL = Self.desktopUrl
+    savePanel.begin { (result) in
+      guard result == .OK, let url = savePanel.url else { return }
+      try? FileManager.default.copyItem(at: profile.url, to: url)
+    }
   }
 }
 

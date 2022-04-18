@@ -13,19 +13,26 @@ struct ProfilesList: NSViewRepresentable {
     self._selection = selection
   }
 
+  func profile(at: Int) -> ProvisioningProfile? {
+    guard at >= 0, at < data.count else { return nil }
+    return data[at]
+  }
+
   func makeNSView(context: Context) -> NSViewType {
     let tableView = TableView()
     tableView.style = .plain
     tableView.usesAlternatingRowBackgroundColors = true
+    tableView.columnAutoresizingStyle = .uniformColumnAutoresizingStyle
 
     let columns = [
       configure(NSTableColumn(identifier: .init("icon"))) {
         $0.title = ""
         $0.width = 16
+        $0.maxWidth = $0.width
+        $0.minWidth = $0.width
       },
       configure(NSTableColumn(identifier: .init("name"))) {
         $0.title = "Name"
-        $0.width = 200
         $0.sortDescriptorPrototype = NSSortDescriptor(
           keyPath: \ProvisioningProfile.name,
           ascending: true,
@@ -42,6 +49,9 @@ struct ProfilesList: NSViewRepresentable {
       },
       configure(NSTableColumn(identifier: .init("creation"))) {
         $0.title = "Creation Date"
+        $0.width = 80
+        $0.maxWidth = $0.width
+        $0.minWidth = $0.width
         $0.sortDescriptorPrototype = NSSortDescriptor(
           keyPath: \ProvisioningProfile.creationDate,
           ascending: true,
@@ -50,6 +60,9 @@ struct ProfilesList: NSViewRepresentable {
       },
       configure(NSTableColumn(identifier: .init("expiry"))) {
         $0.title = "Expiry Date"
+        $0.width = 80
+        $0.maxWidth = $0.width
+        $0.minWidth = $0.width
         $0.sortDescriptorPrototype = NSSortDescriptor(
           keyPath: \ProvisioningProfile.expirationDate,
           ascending: true,
@@ -111,11 +124,15 @@ struct ProfilesList: NSViewRepresentable {
   class TableView: NSTableView {
     weak var tableViewDelegate: TableViewDelegate?
 
-    @objc func tableViewDeleteItemClicked(_ sender: AnyObject) {
+    @objc func tableViewExportItemClicked(_ sender: AnyObject?) {
+      tableViewDelegate?.exportProfile(selectedRow)
+    }
+
+    @objc func tableViewDeleteItemClicked(_ sender: AnyObject?) {
       tableViewDelegate?.moveToTrash(selectedRow)
     }
 
-    @objc func tableViewRevealInFinderItemClicked(_ sender: AnyObject) {
+    @objc func tableViewRevealInFinderItemClicked(_ sender: AnyObject?) {
       tableViewDelegate?.revealInFinder(selectedRow)
     }
   }
@@ -137,18 +154,21 @@ struct ProfilesList: NSViewRepresentable {
     }
 
     // MARK: - TableViewDelegate
+    func exportProfile(_ row: Int) {
+      guard let profile = parent.profile(at: row) else { return }
+
+      parent.profilesManager.exportProfile(profile)
+    }
 
     func moveToTrash(_ row: Int) {
-      guard row >= 0, row < parent.data.count else { return }
+      guard let profile = parent.profile(at: row) else { return }
 
-      let profile = parent.data[row]
       parent.profilesManager.delete(profile: profile)
     }
 
     func revealInFinder(_ row: Int) {
-      guard row >= 0, row < parent.data.count else { return }
+      guard let profile = parent.profile(at: row) else { return }
 
-      let profile = parent.data[row]
       parent.profilesManager.revealInFinder(profile: profile)
     }
 
@@ -290,6 +310,7 @@ class VerticallyCenteredTextFieldCell : NSTextFieldCell {
 }
 
 protocol TableViewDelegate: AnyObject {
+  func exportProfile(_ row: Int)
   func moveToTrash(_ row: Int)
   func revealInFinder(_ row: Int)
 }
@@ -299,56 +320,57 @@ extension NSTextField {
     guard (self.superview?.superview as? ProfilesList.TableView) != nil else { return false }
     guard event.modifierFlags.contains(NSEvent.ModifierFlags.command) else { return false }
     guard event.type == NSEvent.EventType.keyDown else { return false }
+    guard let character = event.charactersIgnoringModifiers else { return false }
 
-    if let character = event.charactersIgnoringModifiers {
-      switch character.lowercased() {
-      case "c":
-        if NSApp.sendAction(#selector(NSText.copy(_:)), to: nil, from: self) { return true }
-        break
+    switch character.uppercased() {
+    case "C":
+      copyItemClicked()
+      return true
 
-      case "v":
-        if NSApp.sendAction(#selector(NSText.paste(_:)), to:nil, from:self) { return true }
-        break
+    case "E":
+      exportItemClicked()
+      return true
 
-      default:
-        break
-      }
+    case "D":
+      deleteItemClicked()
+      return true
+
+    case "F":
+      revealInFinderItemClicked()
+      return true
+
+    default:
+      return false
     }
-
-    return false
   }
 
   open override func rightMouseDown(with event: NSEvent) {
     let rightMenu = NSMenu()
     rightMenu.addItem(withTitle: "Copy", action: #selector(copyItemClicked(_:)), keyEquivalent: "c")
-    rightMenu.addItem(withTitle: "Delete", action: #selector(tableViewDeleteItemClicked(_:)), keyEquivalent: "d")
+    rightMenu.addItem(withTitle: "Export", action: #selector(exportItemClicked(_:)), keyEquivalent: "e")
+    rightMenu.addItem(withTitle: "Delete", action: #selector(deleteItemClicked(_:)), keyEquivalent: "d")
     rightMenu.addItem(withTitle: "Reveal in Finder", action: #selector(revealInFinderItemClicked(_:)), keyEquivalent: "f")
     NSMenu.popUpContextMenu(rightMenu, with: event, for: self)
   }
 
-  @objc private func copyItemClicked(_ sender: AnyObject) {
+  @objc private func copyItemClicked(_ sender: AnyObject? = nil) {
     NSPasteboard.general.clearContents()
     NSPasteboard.general.setString(self.stringValue, forType: .string)
   }
 
-  @objc private func tableViewDeleteItemClicked(_ sender: AnyObject) {
+  @objc private func exportItemClicked(_ sender: AnyObject? = nil) {
+    guard let tblView = self.superview?.superview as? ProfilesList.TableView else { return }
+    tblView.tableViewExportItemClicked(sender)
+  }
+
+  @objc private func deleteItemClicked(_ sender: AnyObject? = nil) {
     guard let tblView = self.superview?.superview as? ProfilesList.TableView else { return }
     tblView.tableViewDeleteItemClicked(sender)
   }
 
-  @objc private func revealInFinderItemClicked(_ sender: AnyObject) {
+  @objc private func revealInFinderItemClicked(_ sender: AnyObject? = nil) {
     guard let tblView = self.superview?.superview as? ProfilesList.TableView else { return }
     tblView.tableViewRevealInFinderItemClicked(sender)
-  }
-}
-
-extension NSText {
-  open override func rightMouseDown(with event: NSEvent) {
-    guard let textField = self.superview as? NSTextField else {
-      return super.rightMouseDown(with: event)
-    }
-
-    textField.rightMouseDown(with: event)
   }
 }
 
