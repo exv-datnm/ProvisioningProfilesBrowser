@@ -59,16 +59,7 @@ class ProvisioningProfilesManager: ObservableObject {
       for case let url as URL in enumerator {
         let profileData = try Data(contentsOf: url)
         let profile = try SwiftyProvisioningProfile.ProvisioningProfile.parse(from: profileData)
-        profiles.append(
-          ProvisioningProfile(
-            url: url,
-            uuid: profile.uuid,
-            name: profile.name,
-            teamName: profile.teamName,
-            creationDate: profile.creationDate,
-            expirationDate: profile.expirationDate
-          )
-        )
+        profiles.append(ProvisioningProfile(profile: profile, url: url))
       }
 
       self.loading = false
@@ -125,7 +116,7 @@ class ProvisioningProfilesManager: ObservableObject {
     let savePanel = NSSavePanel()
     savePanel.canCreateDirectories = true
     savePanel.nameFieldStringValue = profile.name
-    savePanel.allowedFileTypes = ["mobileprovision"]
+    savePanel.allowedContentTypes = [.init(filenameExtension: "mobileprovision")!]
     savePanel.prompt = "Export"
     savePanel.title = "Export Provisioning File (replace if exits)"
     savePanel.directoryURL = Self.desktopUrl

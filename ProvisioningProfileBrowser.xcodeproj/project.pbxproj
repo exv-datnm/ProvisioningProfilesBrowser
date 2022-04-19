@@ -7,11 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		09277635280D4D5500C3ED83 /* SwiftyProvisioningProfile++.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09277634280D4D5500C3ED83 /* SwiftyProvisioningProfile++.swift */; };
+		09ECFD19280E719F0022A9F7 /* SwiftyProvisioningProfile in Frameworks */ = {isa = PBXBuildFile; productRef = 09ECFD18280E719F0022A9F7 /* SwiftyProvisioningProfile */; };
 		CA0526D825C4F479000D9F9A /* ProvisioningProfileBrowserApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA0526D725C4F479000D9F9A /* ProvisioningProfileBrowserApp.swift */; };
 		CA0526DA25C4F479000D9F9A /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA0526D925C4F479000D9F9A /* ContentView.swift */; };
 		CA0526DC25C4F47A000D9F9A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CA0526DB25C4F47A000D9F9A /* Assets.xcassets */; };
 		CA0526DF25C4F47B000D9F9A /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CA0526DE25C4F47B000D9F9A /* Preview Assets.xcassets */; };
-		CA0526EE25CB9678000D9F9A /* SwiftyProvisioningProfile in Frameworks */ = {isa = PBXBuildFile; productRef = CA0526ED25CB9678000D9F9A /* SwiftyProvisioningProfile */; };
 		CA0526F125CB96B1000D9F9A /* ProvisioningProfilesManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA0526F025CB96B1000D9F9A /* ProvisioningProfilesManager.swift */; };
 		CA0526F425CB97F5000D9F9A /* ProfilesList.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA0526F325CB97F5000D9F9A /* ProfilesList.swift */; };
 		CA0526F725CB97F9000D9F9A /* QuickLookPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA0526F625CB97F9000D9F9A /* QuickLookPreview.swift */; };
@@ -22,6 +23,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		09277634280D4D5500C3ED83 /* SwiftyProvisioningProfile++.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SwiftyProvisioningProfile++.swift"; sourceTree = "<group>"; };
 		CA0526D425C4F479000D9F9A /* Provisioning Profile Browser.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Provisioning Profile Browser.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		CA0526D725C4F479000D9F9A /* ProvisioningProfileBrowserApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProvisioningProfileBrowserApp.swift; sourceTree = "<group>"; };
 		CA0526D925C4F479000D9F9A /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -43,7 +45,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				CA05270725CBA2A1000D9F9A /* Witness in Frameworks */,
-				CA0526EE25CB9678000D9F9A /* SwiftyProvisioningProfile in Frameworks */,
+				09ECFD19280E719F0022A9F7 /* SwiftyProvisioningProfile in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -77,6 +79,7 @@
 				CA0526D725C4F479000D9F9A /* ProvisioningProfileBrowserApp.swift */,
 				CA0526F025CB96B1000D9F9A /* ProvisioningProfilesManager.swift */,
 				CA0526F625CB97F9000D9F9A /* QuickLookPreview.swift */,
+				09277634280D4D5500C3ED83 /* SwiftyProvisioningProfile++.swift */,
 				CA0526DB25C4F47A000D9F9A /* Assets.xcassets */,
 				CA0526E025C4F47B000D9F9A /* Info.plist */,
 				CA0526E125C4F47B000D9F9A /* ProvisioningProfileBrowser.entitlements */,
@@ -110,8 +113,8 @@
 			);
 			name = ProvisioningProfileBrowser;
 			packageProductDependencies = (
-				CA0526ED25CB9678000D9F9A /* SwiftyProvisioningProfile */,
 				CA05270625CBA2A1000D9F9A /* Witness */,
+				09ECFD18280E719F0022A9F7 /* SwiftyProvisioningProfile */,
 			);
 			productName = ProvisioningProfileBrowser;
 			productReference = CA0526D425C4F479000D9F9A /* Provisioning Profile Browser.app */;
@@ -141,8 +144,8 @@
 			);
 			mainGroup = CA0526CB25C4F479000D9F9A;
 			packageReferences = (
-				CA0526EC25CB9678000D9F9A /* XCRemoteSwiftPackageReference "SwiftProvisioningProfile" */,
 				CA05270525CBA2A1000D9F9A /* XCRemoteSwiftPackageReference "witness" */,
+				09ECFD17280E719F0022A9F7 /* XCRemoteSwiftPackageReference "SwiftProvisioningProfile" */,
 			);
 			productRefGroup = CA0526D525C4F479000D9F9A /* Products */;
 			projectDirPath = "";
@@ -175,6 +178,7 @@
 				CA0526FA25CB9857000D9F9A /* Configure.swift in Sources */,
 				CA05270325CBA035000D9F9A /* Optional+IsNotNil.swift in Sources */,
 				CA0526DA25C4F479000D9F9A /* ContentView.swift in Sources */,
+				09277635280D4D5500C3ED83 /* SwiftyProvisioningProfile++.swift in Sources */,
 				CA0526F425CB97F5000D9F9A /* ProfilesList.swift in Sources */,
 				CA0526FE25CB9C1B000D9F9A /* ProvisioningProfile.swift in Sources */,
 				CA0526D825C4F479000D9F9A /* ProvisioningProfileBrowserApp.swift in Sources */,
@@ -235,7 +239,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 11.1;
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -290,7 +294,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 11.1;
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = macosx;
@@ -316,7 +320,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 11.0;
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
 				PRODUCT_BUNDLE_IDENTIFIER = exv.vn.ProvisioningProfileBrowser;
 				PRODUCT_NAME = "Provisioning Profile Browser";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -341,7 +345,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 11.0;
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
 				PRODUCT_BUNDLE_IDENTIFIER = exv.vn.ProvisioningProfileBrowser;
 				PRODUCT_NAME = "Provisioning Profile Browser";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -373,12 +377,12 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		CA0526EC25CB9678000D9F9A /* XCRemoteSwiftPackageReference "SwiftProvisioningProfile" */ = {
+		09ECFD17280E719F0022A9F7 /* XCRemoteSwiftPackageReference "SwiftProvisioningProfile" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Sherlouk/SwiftProvisioningProfile";
 			requirement = {
-				kind = exactVersion;
-				version = 2.0.1;
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.0;
 			};
 		};
 		CA05270525CBA2A1000D9F9A /* XCRemoteSwiftPackageReference "witness" */ = {
@@ -392,9 +396,9 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		CA0526ED25CB9678000D9F9A /* SwiftyProvisioningProfile */ = {
+		09ECFD18280E719F0022A9F7 /* SwiftyProvisioningProfile */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = CA0526EC25CB9678000D9F9A /* XCRemoteSwiftPackageReference "SwiftProvisioningProfile" */;
+			package = 09ECFD17280E719F0022A9F7 /* XCRemoteSwiftPackageReference "SwiftProvisioningProfile" */;
 			productName = SwiftyProvisioningProfile;
 		};
 		CA05270625CBA2A1000D9F9A /* Witness */ = {

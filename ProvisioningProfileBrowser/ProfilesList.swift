@@ -77,6 +77,14 @@ struct ProfilesList: NSViewRepresentable {
           comparator: { a, b in (a as! String).localizedStandardCompare(b as! String) }
         )
       },
+      configure(NSTableColumn(identifier: .init("issues"))) {
+        $0.title = "Issues"
+        $0.sortDescriptorPrototype = NSSortDescriptor(
+          keyPath: \ProvisioningProfile.issues,
+          ascending: false,
+          comparator: { a, b in (a as! String).localizedStandardCompare(b as! String) }
+        )
+      }
     ]
     columns.forEach(tableView.addTableColumn(_:))
     // Default to sort by name
@@ -176,9 +184,8 @@ struct ProfilesList: NSViewRepresentable {
     // MARK: - NSTableViewDataSource
 
     func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int) -> NSView? {
-      let profile = parent.data[row]
-
       guard let tableColumn = tableColumn else { return nil }
+      guard let profile = parent.profile(at: row) else { return nil }
 
       switch tableColumn.identifier.rawValue {
       case "icon":
@@ -204,7 +211,7 @@ struct ProfilesList: NSViewRepresentable {
         textField.identifier = tableColumn.identifier
         textField.cell?.truncatesLastVisibleLine = true
         textField.cell?.lineBreakMode = .byTruncatingTail
-        textField.textColor = profile.expirationDate < Date() ? .systemRed : .labelColor
+        textField.textColor = profile.color
         return textField
 
       case "team":
@@ -218,7 +225,7 @@ struct ProfilesList: NSViewRepresentable {
         textField.identifier = tableColumn.identifier
         textField.cell?.truncatesLastVisibleLine = true
         textField.cell?.lineBreakMode = .byTruncatingTail
-        textField.textColor = profile.expirationDate < Date() ? .systemRed : .labelColor
+        textField.textColor = profile.color
         return textField
 
       case "creation":
@@ -230,7 +237,7 @@ struct ProfilesList: NSViewRepresentable {
         textField.drawsBackground = false
         textField.stringValue = Self.dateFormatter.string(from: profile.creationDate)
         textField.identifier = tableColumn.identifier
-        textField.textColor = profile.expirationDate < Date() ? .systemRed : .labelColor
+        textField.textColor = profile.color
         return textField
 
       case "expiry":
@@ -241,7 +248,7 @@ struct ProfilesList: NSViewRepresentable {
         textField.isBezeled = false
         textField.drawsBackground = false
         textField.stringValue = Self.dateFormatter.string(from: profile.expirationDate)
-        textField.textColor = profile.expirationDate < Date() ? .systemRed : .labelColor
+        textField.textColor = profile.color
         textField.identifier = tableColumn.identifier
         return textField
       case "uuid":
@@ -255,7 +262,21 @@ struct ProfilesList: NSViewRepresentable {
         textField.identifier = tableColumn.identifier
         textField.cell?.truncatesLastVisibleLine = true
         textField.cell?.lineBreakMode = .byTruncatingTail
-        textField.textColor = profile.expirationDate < Date() ? .systemRed : .labelColor
+        textField.textColor = profile.color
+        return textField
+
+      case "issues":
+        let textField = NSTextField()
+        textField.cell = VerticallyCenteredTextFieldCell()
+        textField.isEditable = false
+        textField.isSelectable = false
+        textField.isBezeled = false
+        textField.drawsBackground = false
+        textField.stringValue = profile.issues
+        textField.identifier = tableColumn.identifier
+        textField.cell?.truncatesLastVisibleLine = true
+        textField.cell?.lineBreakMode = .byTruncatingTail
+        textField.textColor = profile.color
         return textField
 
       default:
